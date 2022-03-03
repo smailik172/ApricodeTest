@@ -5,17 +5,29 @@ using System.Threading.Tasks;
 using ApricodeTest.AppExceptions;
 using ApricodeTest.Models;
 using ApricodeTest.Models.EFCoreModels;
+using ApricodeTest.Models.Settings;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace ApricodeTest.EFCore
 {
     public class DBManager
     {
-        private static DBManager _dbManager = new DBManager();
-        public static DBManager GetSingleton() => _dbManager;
-        private DBManager()
+        DataBaseSettings _dataBaseSettings;
+        private DbContextOptions<DataBaseContext> _options;
+        private DataBaseContext TempContext => new DataBaseContext(_options);
+        public DBManager(IConfiguration configuration)
         {
-            using (var context = new DataBaseContext())
+            _dataBaseSettings = new DataBaseSettings();
+            var section = configuration.GetSection("DataBaseSettings");
+            section.Bind(_dataBaseSettings);
+
+            var optionsBuilder = new DbContextOptionsBuilder<DataBaseContext>();
+            _options = optionsBuilder
+                    .UseMySql(_dataBaseSettings.ConnectionString, new MySqlServerVersion(new Version(_dataBaseSettings.MySQLVersion)))
+                    .Options;
+
+            using (var context = TempContext)
             {
                 context.Init();
                 InitFakeData();
@@ -23,7 +35,7 @@ namespace ApricodeTest.EFCore
         }
         public void InitFakeData()
         {
-            using (var context = new DataBaseContext())
+            using (var context = TempContext)
             {
                 var existGame = GetVideoGame(context, "Stalker");
                 if (existGame != null)
@@ -58,7 +70,7 @@ namespace ApricodeTest.EFCore
 
         public void CreateGame(string name, string developerName, IEnumerable<string> genreNames)
         {
-            using (var context = new DataBaseContext())
+            using (var context = TempContext)
             {
                 if (GetVideoGame(context, name) != null)
                     throw new ObjectIsExistException();
@@ -76,7 +88,7 @@ namespace ApricodeTest.EFCore
 
         public VideoGame ReadGame(string name)
         {
-            using (var context = new DataBaseContext())
+            using (var context = TempContext)
             {
                 var game = GetVideoGame(context, name);
                 if (game == null)
@@ -87,7 +99,7 @@ namespace ApricodeTest.EFCore
 
         public void ChangeGameDeveloper(string name, string developerName)
         {
-            using (var context = new DataBaseContext())
+            using (var context = TempContext)
             {
                 var game = GetVideoGame(context, name);
                 if (game == null)
@@ -100,7 +112,7 @@ namespace ApricodeTest.EFCore
 
         public void AddGenreForGame(string name, string genre)
         {
-            using (var context = new DataBaseContext())
+            using (var context = TempContext)
             {
                 var game = GetVideoGame(context, name);
                 if (game == null)
@@ -113,7 +125,7 @@ namespace ApricodeTest.EFCore
 
         public void RemoveGenreFromGame(string name, string genre)
         {
-            using (var context = new DataBaseContext())
+            using (var context = TempContext)
             {
                 var game = GetVideoGame(context, name);
                 if (game == null)
@@ -127,7 +139,7 @@ namespace ApricodeTest.EFCore
 
         public void DeleteGame(string name)
         {
-            using (var context = new DataBaseContext())
+            using (var context = TempContext)
             {
                 var videoGame = context.VideoGames.FirstOrDefault(item => item.Name.Equals(name));
                 if (videoGame == null)
@@ -139,7 +151,7 @@ namespace ApricodeTest.EFCore
 
         public List<VideoGame> GetGameWithGenre(string genreName)
         {
-            using (var context = new DataBaseContext())
+            using (var context = TempContext)
             {
                 var genreModel = context.GameGenres
                     .Include(u => u.VideoGames)

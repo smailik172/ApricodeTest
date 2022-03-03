@@ -11,9 +11,9 @@ namespace ApricodeTest.Services
     public class DataService
     {
         private DBManager _dbManager;
-        public DataService()
+        public DataService(DBManager dbManager)
         {
-            _dbManager = DBManager.GetSingleton();
+            _dbManager = dbManager;
         }
 
         public object CreateGame(string name, string developerName, IEnumerable<string> genreNames)

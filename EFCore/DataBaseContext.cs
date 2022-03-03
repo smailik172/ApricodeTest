@@ -17,10 +17,9 @@ namespace ApricodeTest.EFCore
         {
             Database.EnsureCreated();
         }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public DataBaseContext(DbContextOptions<DataBaseContext> options) : base(options)
         {
-            optionsBuilder.UseMySql("server=localhost;user=root;password=root;database=ApricodeTest;", new MySqlServerVersion(new Version(8, 0, 11)));
+
         }
     }
 }

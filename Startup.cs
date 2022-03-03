@@ -34,6 +34,7 @@ namespace ApricodeTest
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "ApricodeTest", Version = "v1" });
             });
+            services.AddSingleton<DBManager>();
             services.AddSingleton<DataService>();
         }
 
