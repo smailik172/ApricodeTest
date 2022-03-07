@@ -17,7 +17,7 @@ namespace ApricodeTest.Controllers
         {
             _dataService = dataService;
         }
-        [HttpGet]
+        [HttpDelete]
         public IActionResult Index(string name)
         {
             return Ok(_dataService.DeleteGame(name));

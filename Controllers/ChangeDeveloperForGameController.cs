@@ -17,7 +17,7 @@ namespace ApricodeTest.Controllers
         {
             _dataService = dataService;
         }
-        [HttpGet]
+        [HttpPut]
         public IActionResult Index(string name, string developerName)
         {
             return Ok(_dataService.ChangeGameDeveloper(name, developerName));
